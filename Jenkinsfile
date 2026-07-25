@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'java-backend-pipeline'
+        IMAGE_NAME = 'handson-cicd-pipeline'
         IMAGE_TAG  = "${BUILD_NUMBER}"
     }
 
@@ -17,23 +17,17 @@ pipeline {
         stage('Run Unit Tests') {
             steps {
                 echo 'Executing JUnit & Mockito tests...'
-                // If a test fails, the pipeline halts immediately.
-                sh './mvnw clean test'
-            }
-        }
-
-        stage('Package Application') {
-            steps {
-                echo 'Building the JAR file...'
-                sh './mvnw package -DskipTests'
+                // Using 'bat' and 'mvnw.cmd' for Windows Jenkins
+                bat 'mvnw.cmd clean test'
             }
         }
 
         stage('Docker Build & Tag') {
             steps {
                 echo "Building Docker Image: ${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                // Using 'bat' instead of 'sh'
+                bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                bat "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
             }
         }
     }
@@ -44,7 +38,7 @@ pipeline {
             cleanWs()
         }
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Pipeline completed successfully! Docker image is ready.'
         }
         failure {
             echo 'Pipeline failed. Check the specific stage logs for details.'
